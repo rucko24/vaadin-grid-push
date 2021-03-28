@@ -46,6 +46,7 @@ public class Broadcaster {
      * who is connected to the server by iterating through UI objects.
      */
     private static final List<SerializableConsumer<List<String>>> listeners = new CopyOnWriteArrayList<>();
+    private static final List<SerializableConsumer<String>> messages = new CopyOnWriteArrayList<>();
 
     /**
      * {@see https://vaadin.com/docs/-/part/framework/advanced/advanced-push.html}
@@ -62,6 +63,18 @@ public class Broadcaster {
     public static Registration register(final SerializableConsumer<List<String>> listener) {
         listeners.add(listener);
         return () -> listeners.remove(listener);
+    }
+
+    public static void broadcastMessage(final String message) {
+        messages.forEach(msg -> {
+            executorService.execute(() -> msg.accept(message));
+        });
+        log.debug("Notified {} UI", listeners.size());
+    }
+
+    public static Registration registerMessage(final SerializableConsumer<String> message) {
+        messages.add(message);
+        return () -> messages.remove(message);
     }
 
 }

@@ -24,6 +24,7 @@ import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.spring.annotation.UIScope;
 import lombok.extern.log4j.Log4j2;
+import org.atmosphere.interceptor.AtmosphereResourceStateRecovery.B;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -42,6 +43,7 @@ public class GridPushOnCells extends HorizontalLayout {
     private ListDataProvider<Transaction> transactionListDataProvider;
     private List<Transaction> transactionList;
     private Registration broadcasterRegistration;
+    private Registration broadcasterMessage;
     private final Label labelHour = new Label("Current server time: ");
     private final Label labelMemory = new Label();
     private final Label preciousStones = new Label("Precious stones: ");
@@ -95,6 +97,8 @@ public class GridPushOnCells extends HorizontalLayout {
     protected void onDetach(DetachEvent detachEvent) {
         broadcasterRegistration.remove();
         broadcasterRegistration = null;
+        broadcasterMessage.remove();
+        broadcasterMessage = null;
     }
 
     @Override
@@ -104,14 +108,14 @@ public class GridPushOnCells extends HorizontalLayout {
 
         if (attachEvent.isInitialAttach()) {
             buttonStart.addClickListener(e -> {
-                Notification.show("Init transactions!");
+                Broadcaster.broadcastMessage("Init transactions!");
                 refreshDataTask.initUpdateGrid();
             });
             buttonStop.addClickListener(e -> {
-                Notification.show("Stop transactions!");
+                Broadcaster.broadcastMessage("Stop transactions!");
                 refreshDataTask.stopUpdateGrid();
             });
-            broadcasterRegistration = Broadcaster.register(updatedTransactionIds -> {
+            this.broadcasterRegistration = Broadcaster.register(updatedTransactionIds -> {
                 getUI().ifPresent(ui -> {
                     ui.access(() -> {
                         updatedTransactionIds.forEach(updateId -> {
@@ -119,7 +123,7 @@ public class GridPushOnCells extends HorizontalLayout {
                             if (!transactionList.contains(transaction)) {
                                 transactionList.add(transaction);
                                 grid.getDataProvider().refreshAll();
-                                log.info("Update caption " + transactionList.size());
+                                log.info("Update caption {}",transactionList.size());
                                 preciousStones.setText("Precious stones: " + transactionList.size());
                             } else {
                                 transactionListDataProvider.refreshItem(transaction);
@@ -128,6 +132,15 @@ public class GridPushOnCells extends HorizontalLayout {
                     });
                 });
             });
+            //Notifications for all UIs
+            this.broadcasterMessage = Broadcaster.registerMessage(message -> {
+                getUI().ifPresent(ui -> {
+                    ui.access(() -> {
+                        Notification.show(message);
+                    });
+                });
+            });
+
         }
     }
 
