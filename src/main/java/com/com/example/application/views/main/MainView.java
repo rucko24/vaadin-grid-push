@@ -1,7 +1,7 @@
 package com.com.example.application.views.main;
 
 import com.com.example.application.views.about.AboutView;
-import com.com.example.application.views.vaadinflow14withgridpush.GridPushOnCells;
+import com.com.example.application.views.vaadinflow14withgridpush.GridPushOnRows;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.applayout.AppLayout;
@@ -83,7 +83,7 @@ public class MainView extends AppLayout {
     }
 
     private Component[] createMenuItems() {
-        return new Tab[]{createTab("Grid push", GridPushOnCells.class),
+        return new Tab[]{createTab("Grid push", GridPushOnRows.class),
                 createTab("About", AboutView.class)};
     }
 

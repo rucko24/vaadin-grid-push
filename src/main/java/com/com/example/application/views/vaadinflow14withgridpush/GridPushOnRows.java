@@ -36,7 +36,7 @@ import java.util.List;
 @RouteAlias(value = "", layout = MainView.class)
 @PageTitle("Grid push")
 @CssImport("./views/vaadinflow14withgridpush/vaadin-flow14withgridpush-view.css")
-public class GridPushOnCells extends HorizontalLayout {
+public class GridPushOnRows extends HorizontalLayout {
 
     private final Grid<Transaction> grid = new Grid<>();
     private final VerticalLayout verticalLayout = new VerticalLayout();
@@ -55,9 +55,9 @@ public class GridPushOnCells extends HorizontalLayout {
     private MemoryConsumtion memoryConsumtion;
 
     @Autowired
-    public GridPushOnCells(final Hour hour,
-                           final RefreshDataTask refreshDataTask,
-                           final MemoryConsumtion memoryConsumtion) {
+    public GridPushOnRows(final Hour hour,
+                          final RefreshDataTask refreshDataTask,
+                          final MemoryConsumtion memoryConsumtion) {
         this.hour = hour;
         this.refreshDataTask = refreshDataTask;
         this.memoryConsumtion = memoryConsumtion;
