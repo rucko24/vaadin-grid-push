@@ -111,7 +111,6 @@ public class GridPushOnCells extends HorizontalLayout {
                 Notification.show("Stop transactions!");
                 refreshDataTask.stopUpdateGrid();
             });
-            //Show time
             broadcasterRegistration = Broadcaster.register(updatedTransactionIds -> {
                 getUI().ifPresent(ui -> {
                     ui.access(() -> {

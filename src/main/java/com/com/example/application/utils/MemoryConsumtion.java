@@ -25,7 +25,7 @@ public class MemoryConsumtion {
         scheduledExecutorService.scheduleAtFixedRate(() -> {
             ui.access(() -> {
                label.setText(getTotalMemory());
-               //System.gc();
+               System.gc();
             });
         },0,1, TimeUnit.SECONDS);
     }
