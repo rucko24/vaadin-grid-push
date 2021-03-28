@@ -10,4 +10,4 @@ $ mvn spring-boot:run
 http://localhost:8000/
 ```
 
-<img src="https://github.com/m1kah/vaadin-grid-push/raw/master/src/main/resouces/gridpushcells.gif?raw=true" width="600px" height="600px" />
+<img src="https://raw.githubusercontent.com/rucko24/vaadin-grid-push/v14/src/main/resources/gridpushcells.gif" />
