@@ -20,12 +20,35 @@
  * SOFTWARE.
  */
 
-package com.m1kah.grid.ui;
+package com.com.example.application.data;
 
-import java.io.Serializable;
-import java.util.List;
+import java.math.BigDecimal;
+import java.time.Instant;
 
-@FunctionalInterface
-public interface BroadcastListener extends Serializable {
-    void onTransactionDataUpdate(List<String> updatedTransactionIds);
+public class TransactionGenerator {
+    private static int newNameIndex;
+    private static String[] PRECIOUS_STONES = {
+            "Alexandrite", "Aquamarine", "Citrine",
+            "Fancy Diamonds", "Garnet", "Lapis Lazuli", "Moonstone",
+            "Morganite", "Paraiba", "Pearls", "Peridot", "Rubellite",
+            "Spinel", "Tanzanite", "Tourmaline", "Turquoise" };
+
+    public static Transaction create() {
+        Transaction transaction = new Transaction();
+        transaction.setName(nextNewName());
+        transaction.setUpdated(Instant.now());
+        transaction.setAmount(BigDecimal.ZERO);
+        if (TransactionRepository.getInstance().find(transaction.getName()) == null) {
+            TransactionRepository.getInstance().insert(transaction);
+        }
+        return transaction;
+    }
+
+    public static boolean hasMore() {
+        return newNameIndex + 1 < PRECIOUS_STONES.length;
+    }
+
+    private static String nextNewName() {
+        return PRECIOUS_STONES[newNameIndex++];
+    }
 }

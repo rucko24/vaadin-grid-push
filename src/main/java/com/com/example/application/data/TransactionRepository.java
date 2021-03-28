@@ -20,22 +20,35 @@
  * SOFTWARE.
  */
 
-package com.m1kah.grid.data;
+package com.com.example.application.data;
+
+import lombok.extern.log4j.Log4j2;
 
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
+@Log4j2
 public class TransactionRepository implements Serializable {
-    private static final TransactionRepository INSTANCE = new TransactionRepository();
-    public static TransactionRepository get() {
-        return INSTANCE;
+
+    private static volatile TransactionRepository instance;
+    public static TransactionRepository getInstance() {
+        if(Objects.isNull(instance)) {
+            synchronized (TransactionRepository.class) {
+                if(Objects.isNull(instance)) {
+                    instance = new TransactionRepository();
+                }
+            }
+        }
+        return instance;
     }
+
     private List<Transaction> transactions = Collections.synchronizedList(new ArrayList<>());
 
-    public TransactionRepository() {
+    private TransactionRepository() {
         transactions.add(createTransaction("Opal"));
         transactions.add(createTransaction("Ruby"));
         transactions.add(createTransaction("Sapphire"));

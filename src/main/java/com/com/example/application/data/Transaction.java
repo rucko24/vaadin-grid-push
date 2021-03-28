@@ -20,7 +20,10 @@
  * SOFTWARE.
  */
 
-package com.m1kah.grid.data;
+package com.com.example.application.data;
+
+
+import com.com.example.application.utils.Hour;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -67,7 +70,7 @@ public class Transaction implements Serializable {
         if (updated == null) {
             return "";
         }
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Hour.PATTERN_TIME)
                 .withZone(ZoneId.systemDefault())
                 .withLocale(Locale.ENGLISH);
         return formatter.format(updated);

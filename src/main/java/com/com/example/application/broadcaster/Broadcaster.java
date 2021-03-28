@@ -20,19 +20,23 @@
  * SOFTWARE.
  */
 
-package com.m1kah.grid.ui;
+package com.com.example.application.broadcaster;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.shared.Registration;
+import lombok.extern.log4j.Log4j2;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ *
+ */
+@Log4j2
 public class Broadcaster {
-    private static final Logger logger = LoggerFactory.getLogger(Broadcaster.class);
+
     /**
      * We are having process level reference to all listeners which are
      * UI objects in this case. We need to make sure that each UI is
@@ -41,31 +45,23 @@ public class Broadcaster {
      * Each browser tab and window is an UI object. We can update everyone
      * who is connected to the server by iterating through UI objects.
      */
-    private static final List<BroadcastListener> listeners = Collections.synchronizedList(new ArrayList<>());
+    private static final List<SerializableConsumer<List<String>>> listeners = new CopyOnWriteArrayList<>();
 
     /**
      * {@see https://vaadin.com/docs/-/part/framework/advanced/advanced-push.html}
      */
     private static final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-    public static void notifyUis(List<String> updatedTransactionIds) {
-        for (BroadcastListener listener : listeners) {
-            executorService.execute(() -> listener.onTransactionDataUpdate(updatedTransactionIds));
-        }
-        logger.debug("Notified {} broadcast listeners", listeners.size());
+    public static void broadcast(List<String> updatedTransactionIds) {
+        listeners.forEach(listener -> {
+            executorService.execute(() -> listener.accept(updatedTransactionIds));
+        });
+        log.debug("Notified {} broadcast listeners", listeners.size());
     }
 
-    public static void addBroadcastListener(BroadcastListener listener) {
+    public static Registration register(final SerializableConsumer<List<String>> listener) {
         listeners.add(listener);
-        logger.info("Broadcast listener added: {}", listener);
+        return () -> listeners.remove(listener);
     }
 
-    public static void removeBroadcastListener(BroadcastListener listener) {
-        listeners.remove(listener);
-        logger.info("Broadcast listener removed: {}", listener);
-    }
-
-    public static void cancelUpdates() {
-        executorService.shutdown();
-    }
 }

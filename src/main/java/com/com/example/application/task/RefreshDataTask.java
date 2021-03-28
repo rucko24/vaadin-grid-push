@@ -20,64 +20,71 @@
  * SOFTWARE.
  */
 
-package com.m1kah.grid.task;
+package com.com.example.application.task;
 
-import com.m1kah.grid.data.Transaction;
-import com.m1kah.grid.data.TransactionGenerator;
-import com.m1kah.grid.data.TransactionRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.com.example.application.broadcaster.Broadcaster;
+import com.com.example.application.data.Transaction;
+import com.com.example.application.data.TransactionGenerator;
+import com.com.example.application.data.TransactionRepository;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.*;
 
-class RefreshDataTask implements Runnable {
-    private static final Logger logger = LoggerFactory.getLogger(RefreshDataTask.class);
-    private final TaskDoneListener taskDoneListener;
-    private final TaskFailListener taskFailListener;
+@Log4j2
+@Service
+public class RefreshDataTask {
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private ScheduledFuture<?> scheduledFuture;
 
-    RefreshDataTask(TaskDoneListener taskDoneListener,
-                    TaskFailListener taskFailListener) {
-        this.taskDoneListener = taskDoneListener;
-        this.taskFailListener = taskFailListener;
+    public void initUpdateGrid() {
+        log.debug("Background task called");
+        this.scheduledFuture = scheduler.scheduleAtFixedRate(() -> {
+            try {
+                Broadcaster.broadcast(updatedTransactionIds());
+            } catch (RuntimeException e) {
+                log.error("Error en runnable Refresh data task");
+            }
+        }, 0,2, TimeUnit.SECONDS);
+
     }
 
-    @Override
-    public void run() {
-        logger.debug("Background task called");
-        try {
-            List<String> updatedTransactionIds = fetchUpdatesToTransactions();
-            taskDoneListener.onTaskDone(updatedTransactionIds);
-        } catch (RuntimeException e) {
-            taskFailListener.onTaskFail(e);
+    public void stopUpdateGrid() {
+        if(Objects.nonNull(scheduledFuture)) {
+            log.info("Stoped update grid");
+            scheduledFuture.cancel(true);
         }
     }
 
-    private List<String> fetchUpdatesToTransactions() {
+    public List<String> updatedTransactionIds() {
         return updateRandomTransactions();
     }
 
     private List<String> updateRandomTransactions() {
-        List<String> updatedTransactions = new ArrayList<>();
-        for (Transaction transaction : TransactionRepository.get().findAll()) {
+        final List<String> updatedTransactions = new CopyOnWriteArrayList<>();
+        for (Transaction transaction : TransactionRepository.getInstance().findAll()) {
             if (Math.random() < 0.3) {
                 continue;
             }
 
             BigDecimal newAmount = transaction.getAmount()
-                    .add(new BigDecimal(Math.random() * 100))
-                    .setScale(0, BigDecimal.ROUND_HALF_UP);
+                    .add(BigDecimal.valueOf(Math.random() * 100))
+                    .setScale(0, RoundingMode.FLOOR);
+
             transaction.setAmount(newAmount);
             transaction.setUpdated(Instant.now());
             updatedTransactions.add(transaction.getName());
-            TransactionRepository.get().update(transaction);
+            TransactionRepository.getInstance().update(transaction);
         }
         if (Math.random() < 0.2 && TransactionGenerator.hasMore()) {
             Transaction transaction = TransactionGenerator.create();
-            if (TransactionRepository.get().find(transaction.getName()) == null) {
-                TransactionRepository.get().insert(transaction);
+            if (TransactionRepository.getInstance().find(transaction.getName()) == null) {
+                TransactionRepository.getInstance().insert(transaction);
             }
             updatedTransactions.add(transaction.getName());
         }
