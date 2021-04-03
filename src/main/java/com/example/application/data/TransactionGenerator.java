@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-package com.com.example.application.data;
+package com.example.application.data;
 
 import java.math.BigDecimal;
 import java.time.Instant;

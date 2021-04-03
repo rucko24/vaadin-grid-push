@@ -20,8 +20,9 @@
  * SOFTWARE.
  */
 
-package com.com.example.application.broadcaster;
+package com.example.application.broadcaster;
 
+import com.example.application.reactivedatabase.model.Book;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
 import lombok.extern.log4j.Log4j2;
@@ -46,6 +47,9 @@ public class Broadcaster {
      * who is connected to the server by iterating through UI objects.
      */
     private static final List<SerializableConsumer<List<String>>> listeners = new CopyOnWriteArrayList<>();
+
+    private static final List<SerializableConsumer<List<Book>>> listenerBooks = new CopyOnWriteArrayList<>();
+
     private static final List<SerializableConsumer<String>> messages = new CopyOnWriteArrayList<>();
 
     /**
@@ -53,16 +57,24 @@ public class Broadcaster {
      */
     private static final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-    public static void broadcast(List<String> updatedTransactionIds) {
+    public static void broadcastForGridTransactions(List<String> updatedTransactionIds) {
         listeners.forEach(listener -> {
             executorService.execute(() -> listener.accept(updatedTransactionIds));
         });
         log.debug("Notified {} broadcast listeners", listeners.size());
     }
 
-    public static Registration register(final SerializableConsumer<List<String>> listener) {
-        listeners.add(listener);
-        return () -> listeners.remove(listener);
+    /**
+     *
+     * Broadcasting items for reactive grid on mongo
+     *
+     * @param books
+     */
+    public static void broadcastForGridReactiveBooks(List<Book> books) {
+        listenerBooks.forEach(book -> {
+            executorService.execute(() -> book.accept(books));
+        });
+        log.debug("Notified {} broadcast listeners", listenerBooks.size());
     }
 
     public static void broadcastMessage(final String message) {
@@ -72,9 +84,28 @@ public class Broadcaster {
         log.debug("Notified {} UI", listeners.size());
     }
 
-    public static Registration registerMessage(final SerializableConsumer<String> message) {
+    public static Registration register(final SerializableConsumer<List<String>> listener,
+                                        final SerializableConsumer<String> message) {
+
+        listeners.add(listener);
         messages.add(message);
-        return () -> messages.remove(message);
+
+        return () -> {
+            listeners.remove(listener);
+            messages.remove(message);
+        };
+    }
+
+    public static Registration registerReactiveBooks(final SerializableConsumer<List<Book>> books,
+                                        final SerializableConsumer<String> message) {
+
+        listenerBooks.add(books);
+        messages.add(message);
+
+        return () -> {
+            listenerBooks.remove(books);
+            messages.remove(message);
+        };
     }
 
 }

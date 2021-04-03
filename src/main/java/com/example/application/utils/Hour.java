@@ -1,4 +1,4 @@
-package com.com.example.application.utils;
+package com.example.application.utils;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Label;

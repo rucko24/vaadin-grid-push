@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-package com.com.example.application.data;
+package com.example.application.data;
 
 import lombok.extern.log4j.Log4j2;
 

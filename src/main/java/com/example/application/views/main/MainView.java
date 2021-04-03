@@ -1,7 +1,8 @@
-package com.com.example.application.views.main;
+package com.example.application.views.main;
 
-import com.com.example.application.views.about.AboutView;
-import com.com.example.application.views.vaadinflow14withgridpush.GridPushOnRows;
+import com.example.application.views.about.AboutView;
+import com.example.application.views.mongopush.ReactiveMongoPushView;
+import com.example.application.views.vaadinflow14withgridpush.GridPushOnRows;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.applayout.AppLayout;
@@ -27,7 +28,7 @@ import java.util.Optional;
 /**
  * The main view is a top-level placeholder for other views.
  */
-@PWA(name = "Vaadin Flow 14 with grid push", shortName = "Vaadin Flow 14 with grid push", enableInstallPrompt = false)
+@PWA(name = "Vaadin Flow 14 with grid push", shortName = "Vaadin Flow 14 with grid push", enableInstallPrompt = true)
 @JsModule("./styles/shared-styles.js")
 @CssImport("./views/main/main-view.css")
 @Push
@@ -83,8 +84,9 @@ public class MainView extends AppLayout {
     }
 
     private Component[] createMenuItems() {
-        return new Tab[]{createTab("Grid push", GridPushOnRows.class),
-                createTab("About", AboutView.class)};
+        return new Tab[]{createTab("Grid push", GridPushOnRows.class)
+                ,createTab("Reactive mongo push", ReactiveMongoPushView.class)
+                ,createTab("About", AboutView.class)};
     }
 
     private static Tab createTab(String text, Class<? extends Component> navigationTarget) {

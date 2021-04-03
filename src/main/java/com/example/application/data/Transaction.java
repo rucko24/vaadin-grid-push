@@ -20,10 +20,10 @@
  * SOFTWARE.
  */
 
-package com.com.example.application.data;
+package com.example.application.data;
 
 
-import com.com.example.application.utils.Hour;
+import com.example.application.utils.Hour;
 
 import java.io.Serializable;
 import java.math.BigDecimal;

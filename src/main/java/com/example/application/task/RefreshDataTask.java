@@ -20,12 +20,12 @@
  * SOFTWARE.
  */
 
-package com.com.example.application.task;
+package com.example.application.task;
 
-import com.com.example.application.broadcaster.Broadcaster;
-import com.com.example.application.data.Transaction;
-import com.com.example.application.data.TransactionGenerator;
-import com.com.example.application.data.TransactionRepository;
+import com.example.application.broadcaster.Broadcaster;
+import com.example.application.data.Transaction;
+import com.example.application.data.TransactionGenerator;
+import com.example.application.data.TransactionRepository;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
@@ -42,11 +42,12 @@ public class RefreshDataTask {
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> scheduledFuture;
 
-    public void initUpdateGrid() {
+    public void initUpdateGrid(final String message) {
         log.debug("Background task called");
+        Broadcaster.broadcastMessage(message);
         this.scheduledFuture = scheduler.scheduleAtFixedRate(() -> {
             try {
-                Broadcaster.broadcast(updatedTransactionIds());
+                Broadcaster.broadcastForGridTransactions(updatedTransactionIds());
             } catch (RuntimeException e) {
                 log.error("Error en runnable Refresh data task");
             }
@@ -54,9 +55,10 @@ public class RefreshDataTask {
 
     }
 
-    public void stopUpdateGrid() {
+    public void stopUpdateGrid(final String message) {
         if(Objects.nonNull(scheduledFuture)) {
-            log.info("Stoped update grid");
+            Broadcaster.broadcastMessage(message);
+            log.info(message);
             scheduledFuture.cancel(true);
         }
     }
