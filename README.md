@@ -10,4 +10,4 @@ $ mvn spring-boot:run
 http://localhost:8000/
 ```
 
-<img src="https://raw.githubusercontent.com/rucko24/vaadin-grid-push/v14/src/main/resources/UpdateItemFromCompass.gif" />
+![image](https://github.com/rucko24/vaadin-grid-push/blob/mongo-push/src/main/resources/UpdateItemFromCompass.gif?raw=true)
