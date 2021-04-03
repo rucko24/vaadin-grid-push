@@ -54,7 +54,7 @@ class BookReactiveRepoTestCase {
                         )
                 )
                 .delayElements(Duration.ofSeconds(1)))
-                .expectNextCount(6)
+                .expectNextCount(8)
                 .verifyComplete();
 
     }
