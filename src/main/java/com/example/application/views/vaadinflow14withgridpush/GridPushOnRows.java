@@ -73,7 +73,7 @@ public class GridPushOnRows extends AbstractViewPush<Transaction> {
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
-        //super.onAttach(attachEvent);
+        super.onAttach(attachEvent);
         if (attachEvent.isInitialAttach()) {
             buttonStart.addClickListener(e -> {
                 refreshDataTask.initUpdateGrid("Init transactions!");

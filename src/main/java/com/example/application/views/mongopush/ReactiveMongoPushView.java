@@ -17,13 +17,12 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import reactor.core.publisher.Flux;
-import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
 import java.util.List;
@@ -36,7 +35,6 @@ import java.util.concurrent.CountDownLatch;
 @Route(value = "mongo-push", layout = MainView.class)
 @PageTitle("Reactive mongo push")
 @CssImport("./views/vaadinflow14withgridpush/vaadin-flow14withgridpush-view.css")
-@SpringComponent
 public class ReactiveMongoPushView extends AbstractViewPush<Book> {
 
     private final Grid<Book> reactiveBookGrid = new Grid<>();
@@ -47,12 +45,11 @@ public class ReactiveMongoPushView extends AbstractViewPush<Book> {
     private ListDataProvider<Book> listDataProvider;
     private Registration registration;
 
-    @Autowired
     private RefreshReactiveDataTask refreshReactiveDataTask;
 
-    @Autowired
     private ReactiveBookService reactiveBookService;
 
+    @Autowired
     public ReactiveMongoPushView(final ReactiveBookService reactiveBookService
             , final RefreshReactiveDataTask refreshReactiveDataTask) {
         this.reactiveBookService = reactiveBookService;
@@ -86,7 +83,7 @@ public class ReactiveMongoPushView extends AbstractViewPush<Book> {
 
     @Override
     protected void onDetach(DetachEvent detachEvent) {
-        super.onDetach(detachEvent);
+        //super.onDetach(detachEvent);
         registration.remove();
         registration = null;
     }
