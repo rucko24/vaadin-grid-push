@@ -7,7 +7,6 @@ import com.vaadin.flow.spring.annotation.SpringComponent;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.*;
@@ -39,20 +38,9 @@ public class RefreshReactiveDataTask {
     }
 
     private List<Book> updatedBooks() {
-        final var list = new CopyOnWriteArrayList<Book>();
-        final CountDownLatch latch = new CountDownLatch(1);
-        reactiveBookService
-                .findAll()
-                .delayElements(Duration.ofMillis(100))
-                .doOnComplete(latch::countDown)
-                .subscribe(list::add);
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        log.info("book list size " + list.size());
-        return list;
+        final List<Book> bookList = reactiveBookService.findAllForUpdatedBooks();
+        log.info("book list size " + bookList.size());
+        return bookList;
     }
 
 

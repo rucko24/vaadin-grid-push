@@ -8,6 +8,10 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
+
 @Service
 @Log4j2
 public class ReactiveBookService {
@@ -43,8 +47,32 @@ public class ReactiveBookService {
                             .build());
     }
 
-    public Flux<Book> findAll() {
-        return bookReactiveRepository.findAll();
+    public Flux<List<Book>> findAll() {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final List<Book> bookList = new CopyOnWriteArrayList<>();
+        bookReactiveRepository.findAll()
+                .doOnComplete(latch::countDown)
+                .subscribe(bookList::add);
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return Flux.just(bookList);
+    }
+
+    public List<Book> findAllForUpdatedBooks() {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final List<Book> bookList = new CopyOnWriteArrayList<>();
+        bookReactiveRepository.findAll()
+                .doOnComplete(latch::countDown)
+                .subscribe(bookList::add);
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return bookList;
     }
 
     public void saveAll(final Flux<Book> bookFlux) {
