@@ -8,27 +8,22 @@ import com.example.application.views.AbstractViewPush;
 import com.example.application.views.main.MainView;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.time.Duration;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.CountDownLatch;
-
+import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 
 @UIScope
 @Log4j2
@@ -41,8 +36,6 @@ public class ReactiveMongoPushView extends AbstractViewPush<Book> {
     private final Button buttonStart = new Button("refresh!", VaadinIcon.REFRESH.create());
     private final Button buttonStop = new Button("Stop refresh!", VaadinIcon.STOP.create());
     private final Label labelGridCaption = new Label("Documents: ");
-    private List<Book> listBooks;
-    private ListDataProvider<Book> listDataProvider;
     private Registration registration;
 
     private RefreshReactiveDataTask refreshReactiveDataTask;
@@ -55,35 +48,39 @@ public class ReactiveMongoPushView extends AbstractViewPush<Book> {
         this.reactiveBookService = reactiveBookService;
         this.refreshReactiveDataTask = refreshReactiveDataTask;
 
-        this.init();
+        this.initGrid();
     }
 
-    private void init() {
+    private void initGrid() {
         reactiveBookGrid.addColumn(Book::getId).setHeader("id");
         reactiveBookGrid.addColumn(Book::getTitle).setHeader("Title");
         reactiveBookGrid.addColumn(Book::getAuthor).setHeader("Author");
-        final CountDownLatch latch = new CountDownLatch(1);
-        listBooks = new CopyOnWriteArrayList<>();
-        reactiveBookService
-                .findAll()
-                .delayElements(Duration.ofMillis(100))
-                .doOnComplete(latch::countDown)
-                .subscribe(listBooks::add);
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        labelGridCaption.setText("Documents: " + listBooks.size());
-        listDataProvider = new ListDataProvider<>(listBooks);
-        reactiveBookGrid.setDataProvider(listDataProvider);
-
         super.initComponents(reactiveBookGrid, labelGridCaption, buttonStart, buttonStop);
+    }
+
+    /**
+     * Lazy loading with DataProvider.fromCallBack
+     *
+     * @param ui
+     */
+    private void initData(final UI ui) {
+        Flux.defer(() -> reactiveBookService.findAll())
+                .subscribeOn(Schedulers.boundedElastic())
+                .subscribe(listBooks -> {
+                    ui.access(() -> {
+                        labelGridCaption.setText("Documents: " + listBooks.size());
+                        reactiveBookGrid.setDataProvider(DataProvider.fromCallbacks(
+                                query -> {
+                                    int offset = query.getOffset();
+                                    return listBooks.subList(offset, query.getOffset() + query.getLimit()).stream();
+                                }, query -> listBooks.size()));
+                    });
+                });
     }
 
     @Override
     protected void onDetach(DetachEvent detachEvent) {
-        //super.onDetach(detachEvent);
+        super.onDetach(detachEvent);
         registration.remove();
         registration = null;
     }
@@ -93,6 +90,7 @@ public class ReactiveMongoPushView extends AbstractViewPush<Book> {
         //required for show time and memmory consumption
         super.onAttach(attachEvent);
         if (attachEvent.isInitialAttach()) {
+            this.initData(attachEvent.getUI());
             this.buttonStart.addClickListener(e -> {
                 refreshReactiveDataTask.initUpdateGrid("Init refresh items from database");
             });
