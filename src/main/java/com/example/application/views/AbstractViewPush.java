@@ -1,7 +1,7 @@
 package com.example.application.views;
 
 import com.example.application.utils.Hour;
-import com.example.application.utils.MemoryConsumtion;
+import com.example.application.utils.MemoryConsumption;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -29,7 +29,7 @@ public abstract class AbstractViewPush<T> extends HorizontalLayout {
     private Hour hour;
 
     @Autowired
-    private MemoryConsumtion memoryConsumtion;
+    private MemoryConsumption memoryConsumtion;
 
     protected void initComponents(final Grid<T> grid, final Label labelCaptionGrid,
                                   Button buttonStart,Button buttonStop) {

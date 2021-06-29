@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
  *
  */
 @Service
-public class MemoryConsumtion {
+public class MemoryConsumption {
 
     private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
 
