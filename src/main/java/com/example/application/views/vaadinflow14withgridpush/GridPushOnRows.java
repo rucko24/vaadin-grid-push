@@ -14,14 +14,15 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.shared.Registration;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
-
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +32,7 @@ import java.util.List;
 @RouteAlias(value = "", layout = MainView.class)
 @PageTitle("Grid push")
 @CssImport("./views/vaadinflow14withgridpush/vaadin-flow14withgridpush-view.css")
+@RequiredArgsConstructor
 public class GridPushOnRows extends AbstractViewPush<Transaction> {
 
     private final Grid<Transaction> grid = new Grid<>();
@@ -41,11 +43,10 @@ public class GridPushOnRows extends AbstractViewPush<Transaction> {
     private final Button buttonStart = new Button("Init transactions!", VaadinIcon.REFRESH.create());
     private final Button buttonStop = new Button("Stop transactions!", VaadinIcon.STOP.create());
 
-    private RefreshDataTask refreshDataTask;
+    private final RefreshDataTask refreshDataTask;
 
-    @Autowired
-    public GridPushOnRows(final RefreshDataTask refreshDataTask) {
-        this.refreshDataTask = refreshDataTask;
+    @PostConstruct
+    public void init() {
         this.initComponents();
         this.iniData();
 
@@ -61,8 +62,13 @@ public class GridPushOnRows extends AbstractViewPush<Transaction> {
 
     private void iniData() {
         transactionList = new ArrayList<>(TransactionRepository.getInstance().findAll());
-        transactionListDataProvider = new ListDataProvider<>(transactionList);
-        grid.setDataProvider(transactionListDataProvider);
+//        transactionListDataProvider = new ListDataProvider<>(transactionList);
+        grid.setDataProvider(DataProvider.fromCallbacks(
+                query -> {
+                    int offset = query.getOffset();
+                    return transactionList.subList(offset, query.getOffset() + query.getLimit()).stream();
+                }, query -> transactionList.size()));
+
     }
 
     @Override
@@ -93,7 +99,7 @@ public class GridPushOnRows extends AbstractViewPush<Transaction> {
                                 System.out.println("Update caption {} " + transactionList.size());
                                 labelGridCaption.setText("Precious stones: " + transactionList.size());
                             } else {
-                                transactionListDataProvider.refreshItem(transaction);
+                                grid.getDataProvider().refreshItem(transaction);
                             }
                         });
                     });

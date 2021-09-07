@@ -4,8 +4,8 @@ import com.example.application.broadcaster.Broadcaster;
 import com.example.application.reactivedatabase.model.Book;
 import com.example.application.reactivedatabase.service.ReactiveBookService;
 import com.vaadin.flow.spring.annotation.SpringComponent;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.Objects;
@@ -13,16 +13,12 @@ import java.util.concurrent.*;
 
 @Log4j2
 @SpringComponent
+@RequiredArgsConstructor
 public class RefreshReactiveDataTask {
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> scheduledFuture;
 
-    private ReactiveBookService reactiveBookService;
-
-    @Autowired
-    public RefreshReactiveDataTask(final ReactiveBookService reactiveBookService) {
-        this.reactiveBookService = reactiveBookService;
-    }
+    private final ReactiveBookService reactiveBookService;
 
     public void initUpdateGrid(final String message) {
         log.info(message);
@@ -42,8 +38,6 @@ public class RefreshReactiveDataTask {
         log.info("book list size " + bookList.size());
         return bookList;
     }
-
-
 
     public void stopUpdateGrid(final String message) {
         if(Objects.nonNull(scheduledFuture)) {
