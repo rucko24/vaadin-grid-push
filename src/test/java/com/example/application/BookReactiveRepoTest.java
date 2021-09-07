@@ -16,7 +16,7 @@ import java.util.Arrays;
 
 @Log4j2
 @DataMongoTest
-@DisplayName("<= Book reactive mongo with local configuration on docker =>")
+@DisplayName("<= Book reactive mongo with embedded mongo repository =>")
 class BookReactiveRepoTest {
 
     @Autowired
