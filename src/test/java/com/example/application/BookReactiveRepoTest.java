@@ -14,9 +14,6 @@ import reactor.test.StepVerifier;
 import java.time.Duration;
 import java.util.Arrays;
 
-/**
- *
- */
 @Log4j2
 @DataMongoTest
 @DisplayName("<= Book reactive mongo with local configuration on docker =>")

@@ -24,7 +24,7 @@ public class Application extends SpringBootServletInitializer {
 
     @Bean
     public CommandLineRunner fillRepoWithSomeBooks(final BookReactiveRepository reactiveRepository) {
-        return (e -> {
+        return ((String... args) -> {
             reactiveRepository
                     .deleteAll()
                     .thenMany(reactiveRepository.saveAll(Flux.fromIterable(Arrays.asList(
