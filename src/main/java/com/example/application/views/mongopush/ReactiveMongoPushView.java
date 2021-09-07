@@ -20,16 +20,19 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.spring.annotation.UIScope;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
+
+import javax.annotation.PostConstruct;
 
 @UIScope
 @Log4j2
 @Route(value = "mongo-push", layout = MainView.class)
 @PageTitle("Reactive mongo push")
 @CssImport("./views/vaadinflow14withgridpush/vaadin-flow14withgridpush-view.css")
+@RequiredArgsConstructor
 public class ReactiveMongoPushView extends AbstractViewPush<Book> {
 
     private final Grid<Book> reactiveBookGrid = new Grid<>();
@@ -38,17 +41,14 @@ public class ReactiveMongoPushView extends AbstractViewPush<Book> {
     private final Label labelGridCaption = new Label("Documents: ");
     private Registration registration;
 
-    private RefreshReactiveDataTask refreshReactiveDataTask;
+    private final RefreshReactiveDataTask refreshReactiveDataTask;
 
-    private ReactiveBookService reactiveBookService;
+    private final ReactiveBookService reactiveBookService;
 
-    @Autowired
-    public ReactiveMongoPushView(final ReactiveBookService reactiveBookService
-            , final RefreshReactiveDataTask refreshReactiveDataTask) {
-        this.reactiveBookService = reactiveBookService;
-        this.refreshReactiveDataTask = refreshReactiveDataTask;
-
+    @PostConstruct
+    public void init() {
         this.initGrid();
+
     }
 
     private void initGrid() {
@@ -64,7 +64,7 @@ public class ReactiveMongoPushView extends AbstractViewPush<Book> {
      * @param ui
      */
     private void initData(final UI ui) {
-        Flux.defer(() -> reactiveBookService.findAll())
+        Flux.defer(reactiveBookService::findAll)
                 .subscribeOn(Schedulers.boundedElastic())
                 .subscribe(listBooks -> {
                     ui.access(() -> {
