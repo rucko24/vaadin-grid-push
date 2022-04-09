@@ -25,6 +25,9 @@ public class RefreshReactiveDataTask {
         Broadcaster.broadcastMessage(message);
         this.scheduledFuture = scheduler.scheduleAtFixedRate(() -> {
             try {
+                /**
+                 * Esto invoca a mongo con los libros actualizados
+                 */
                 Broadcaster.broadcastForGridReactiveBooks(updatedBooks());
             } catch (RuntimeException e) {
                 log.error("Error en runnable Refresh data task");

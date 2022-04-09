@@ -97,7 +97,10 @@ public class ReactiveMongoPushView extends AbstractViewPush<Book> {
             this.buttonStop.addClickListener(e -> {
                 refreshReactiveDataTask.stopUpdateGrid("Stop refresh items from database");
             });
-
+            /**
+             * Cada vez que se abra una tab nueva, se obtienen los libros disponibles en DB
+             * pero se refleja en todas las UI
+             */
             this.registration = Broadcaster.registerReactiveBooks(booksList -> {
                 attachEvent.getUI().access(() -> {
                     labelGridCaption.setText("Documents: " + booksList.size());
